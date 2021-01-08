@@ -1,6 +1,3 @@
-import 'package:flutter/foundation.dart';
-
-@immutable
 class Movie {
   final String title;
   final String imdbId;
@@ -16,6 +13,8 @@ class Movie {
   final String actors;
   final String plot;
 
+  int star;
+
   Movie.fromJson(Map<String, dynamic> json)
       : title = json['Title'],
         imdbId = json['imdbID'],
@@ -28,5 +27,15 @@ class Movie {
         director = json['Director'],
         writer = json['Writer'],
         actors = json['Actors'],
-        plot = json['Plot'];
+        plot = json['Plot'],
+        star = json['Star'];
+
+  Map<String, dynamic> toJson() => {
+        'Title': title,
+        'imdbID': imdbId,
+        'Poster': poster,
+        'Type': type,
+        'Year': year,
+        'Star': star,
+      };
 }

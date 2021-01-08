@@ -38,7 +38,7 @@ class _HomePageState extends State<HomePage> {
             label: 'Search',
           ),
           BottomNavigationBarItem(
-            icon: new Icon(Icons.star),
+            icon: new Icon(Icons.favorite),
             label: 'Favorite',
           ),
         ],

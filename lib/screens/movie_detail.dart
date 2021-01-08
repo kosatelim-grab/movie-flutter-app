@@ -2,6 +2,8 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:movie_app/models/favorite_list.dart';
+import 'package:provider/provider.dart';
 import '../models/movie.dart';
 import '../common/const.dart';
 
@@ -19,7 +21,37 @@ class _MovieDetailPageState extends State<MovieDetailPage> {
   bool isFinishLoading = false;
 
   _MovieDetailPageState(this.movie) {
-    _loadDetail(movie.imdbId);
+    _loadDetail();
+  }
+
+  Widget _voteBar() {
+    return Row(
+      children: [
+        Expanded(
+            child: Container(
+                padding: EdgeInsets.all(16),
+                child: Consumer<FavoriteListModel>(
+                    builder: (context, starList, child) {
+                  var curMovie = starList.get(movie.imdbId);
+                  List<Widget> star = [];
+                  for (var i = 1; i <= 5; i++) {
+                    star.add(IconButton(
+                        icon: Icon(
+                            (curMovie.star ?? 0) >= i
+                                ? Icons.star
+                                : Icons.star_border,
+                            size: 32,
+                            color: Colors.yellow.shade800),
+                        onPressed: () => _vote(i)));
+                  }
+
+                  return Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: star,
+                  );
+                })))
+      ],
+    );
   }
 
   void _showAlert(String text) {
@@ -28,26 +60,37 @@ class _MovieDetailPageState extends State<MovieDetailPage> {
     ));
   }
 
-  void _loadDetail(String imdbId) {
+  void _loadDetail() async {
+    String imdbId = movie?.imdbId ?? "";
+    if (imdbId == "") return;
+
     var uri = Uri.http(
         apiWebsite, '', {'i': imdbId, 'plot': 'full', 'apikey': apiToken});
-    http.get(uri.toString()).then((resp) {
-      if (resp.statusCode == 200) {
-        Map<String, dynamic> data = jsonDecode(resp.body);
-        try {
-          setState(() {
-            movie = Movie.fromJson(data);
-            isFinishLoading = true;
-          });
-        } catch (e, s) {
-          print(e);
-          print(s);
-          _showAlert("Data is corrupted.");
-        }
-      } else {
-        _showAlert("Load data unsuccessfully.");
+
+    http.Response resp = await http.get(uri.toString());
+    if (resp.statusCode == 200) {
+      Map<String, dynamic> data = jsonDecode(resp.body);
+      try {
+        setState(() {
+          movie = Movie.fromJson(data);
+          isFinishLoading = true;
+        });
+      } catch (e, s) {
+        print(e);
+        print(s);
+        _showAlert("Data is corrupted.");
       }
-    });
+    } else {
+      _showAlert("Load data unsuccessfully.");
+    }
+  }
+
+  void _vote(int star) {
+    String imdbId = movie?.imdbId ?? "";
+    if (imdbId == "") return;
+
+    Provider.of<FavoriteListModel>(context, listen: false)
+        .giveStar(imdbId, star);
   }
 
   @override
@@ -79,31 +122,37 @@ class _MovieDetailPageState extends State<MovieDetailPage> {
         ),
         body: Container(
             margin: EdgeInsets.all(16),
-            child: Row(
-              children: [
-                Expanded(
-                    flex: 2,
-                    child: Container(
-                      child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Image.network(movie.poster,
-                                key: ValueKey(movie.poster)),
-                            if (isFinishLoading) ...leftSide,
-                          ]),
-                    )),
-                Expanded(
-                    flex: 3,
-                    child: Container(
-                        margin: EdgeInsets.symmetric(horizontal: 16),
+            child: Column(children: [
+              Expanded(
+                  child: Row(
+                children: [
+                  Expanded(
+                      flex: 2,
+                      child: Container(
                         child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            if (!isFinishLoading) Text("Loading..."),
-                            if (isFinishLoading) ...rightSide,
-                          ],
-                        ))),
-              ],
-            )));
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Image.network(movie.poster,
+                                  key: ValueKey(movie.poster)),
+                              if (isFinishLoading) ...leftSide,
+                            ]),
+                      )),
+                  Expanded(
+                      flex: 3,
+                      child: Container(
+                          alignment: Alignment.topCenter,
+                          margin: EdgeInsets.symmetric(horizontal: 16),
+                          child: SingleChildScrollView(
+                              child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              if (!isFinishLoading) Text("Loading..."),
+                              if (isFinishLoading) ...rightSide,
+                            ],
+                          )))),
+                ],
+              )),
+              _voteBar(),
+            ])));
   }
 }

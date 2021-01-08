@@ -6,14 +6,14 @@ import 'package:flutter/material.dart';
 import 'package:movie_app/models/movie_list.dart';
 import 'package:provider/provider.dart';
 
-import 'models/star_list.dart';
+import 'models/favorite_list.dart';
 import './models/movie_list.dart';
 import './screens/home.dart';
 
 void main() => runApp(
       MultiProvider(
         providers: [
-          ChangeNotifierProvider<StarListModel>(create: (context) => StarListModel()),
+          ChangeNotifierProvider<FavoriteListModel>(create: (context) => FavoriteListModel()),
           ChangeNotifierProvider<MovieListModel>(create: (context) => MovieListModel()),
         ],
         child: App(),
