@@ -25,33 +25,26 @@ class _MovieDetailPageState extends State<MovieDetailPage> {
   }
 
   Widget _voteBar() {
-    return Row(
-      children: [
-        Expanded(
-            child: Container(
-                padding: EdgeInsets.all(16),
-                child: Consumer<FavoriteListModel>(
-                    builder: (context, starList, child) {
-                  var curMovie = starList.get(movie.imdbId);
-                  List<Widget> star = [];
-                  for (var i = 1; i <= 5; i++) {
-                    star.add(IconButton(
-                        icon: Icon(
-                            (curMovie.star ?? 0) >= i
-                                ? Icons.star
-                                : Icons.star_border,
-                            size: 32,
-                            color: Colors.yellow.shade800),
-                        onPressed: () => _vote(i)));
-                  }
+    return Consumer<FavoriteListModel>(builder: (context, starList, child) {
+      if (!starList.has(movie.imdbId)) return Row();
 
-                  return Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: star,
-                  );
-                })))
-      ],
-    );
+      var curMovie = starList.get(movie.imdbId);
+      print(curMovie);
+      List<Widget> star = [];
+      for (var i = 1; i <= 5; i++) {
+        star.add(IconButton(
+            icon: Icon(
+                (curMovie.star ?? 0) >= i ? Icons.star : Icons.star_border,
+                size: 32,
+                color: Colors.yellow.shade800),
+            onPressed: () => _vote(i)));
+      }
+
+      return Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: star,
+      );
+    });
   }
 
   void _showAlert(String text) {
