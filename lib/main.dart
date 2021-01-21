@@ -2,33 +2,32 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/material.dart';
-import 'package:movie_app/models/movie_list.dart';
-import 'package:provider/provider.dart';
+import 'package:fish_redux/fish_redux.dart';
+import 'package:flutter/material.dart' hide Action, Page;
 
-import 'models/favorite_list.dart';
-import './models/movie_list.dart';
-import './screens/home.dart';
+import 'page/movie_detail/page.dart';
+import 'page/home/page.dart';
 
-void main() => runApp(
-      MultiProvider(
-        providers: [
-          ChangeNotifierProvider<FavoriteListModel>(create: (context) => FavoriteListModel()),
-          ChangeNotifierProvider<MovieListModel>(create: (context) => MovieListModel()),
-        ],
-        child: App(),
-      ),
-    );
+void main() => runApp(createApp());
 
-class App extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Movie App',
-      theme: ThemeData(
-        primaryColor: Colors.red,
-      ),
-      home: HomePage(),
-    );
-  }
+Widget createApp() {
+  final AbstractRoutes routes = PageRoutes(
+    pages: <String, Page<Object, dynamic>>{
+      'home': HomePage(),
+      'movie_detail': MovieDetailPage(),
+    },
+  );
+
+  return MaterialApp(
+    title: 'Movie App',
+    theme: ThemeData(
+      primaryColor: Colors.red,
+    ),
+    home: routes.buildPage('home', null),
+    onGenerateRoute: (RouteSettings settings) {
+      return MaterialPageRoute<Object>(builder: (BuildContext context) {
+        return routes.buildPage(settings.name, settings.arguments);
+      });
+    },
+  );
 }

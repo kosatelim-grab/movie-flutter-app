@@ -1,25 +1,21 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/semantics.dart';
-import 'package:movie_app/screens/movie_detail.dart';
-import '../models/favorite_list.dart';
 import '../models/movie.dart';
 
 class MovieTileWidget extends StatelessWidget {
   final Movie movie;
-  final FavoriteListModel favoriteListModel;
+  final List<Movie> favoriteMovies;
   final void Function() onTap;
+  final Function(Movie) onStar;
+  final Function(Movie) onRemoveStar;
   final bool showStar;
 
-  MovieTileWidget(this.movie,
-      {this.favoriteListModel, this.onTap, this.showStar});
+  MovieTileWidget({this.movie, this.favoriteMovies, this.onTap, this.showStar, this.onStar, this.onRemoveStar});
 
   Widget _favoriteIcon() {
-    bool isFavorite = favoriteListModel?.has(movie.imdbId) ?? false;
+    bool isFavorite = favoriteMovies.indexWhere((x) => x.imdbId == movie.imdbId) > -1;
     return IconButton(
       icon: Icon(isFavorite ? Icons.favorite : Icons.favorite_border, color: Colors.red.shade600),
-      onPressed: () => isFavorite
-          ? favoriteListModel?.remove(movie.imdbId)
-          : favoriteListModel?.add(movie),
+      onPressed: () => isFavorite ? onRemoveStar(movie) : onStar(movie),
     );
   }
 
@@ -56,8 +52,7 @@ class MovieTileWidget extends StatelessWidget {
                             movie.title ?? "",
                             overflow: TextOverflow.ellipsis,
                             maxLines: 2,
-                            style: TextStyle(
-                                fontSize: 16, fontWeight: FontWeight.bold),
+                            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                           ),
                           Text(movie.type ?? ""),
                           Text(movie.year ?? "")
@@ -71,17 +66,13 @@ class MovieTileWidget extends StatelessWidget {
 
 class MovieListWidget extends StatelessWidget {
   final List<Movie> movies;
-  final FavoriteListModel favoriteListModel;
+  final List<Movie> favoriteListModel;
   final bool showStar;
+  final Function(Movie) onMovieTap;
+  final Function(Movie) onStar;
+  final Function(Movie) onRemoveStar;
 
-  void _onMovieTap(BuildContext context, Movie movie) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => MovieDetailPage(movie)),
-    );
-  }
-
-  MovieListWidget(this.movies, this.favoriteListModel, {this.showStar = false});
+  MovieListWidget(this.movies, this.favoriteListModel, {this.onMovieTap, this.showStar = false, this.onStar, this.onRemoveStar});
 
   @override
   Widget build(BuildContext context) {
@@ -91,10 +82,13 @@ class MovieListWidget extends StatelessWidget {
 
     return ListView(
         children: movies
-            .map<Widget>((movie) => MovieTileWidget(movie,
-                favoriteListModel: favoriteListModel,
-                onTap: () => _onMovieTap(context, movie),
-                showStar: showStar))
+            .map<Widget>((movie) => MovieTileWidget(
+                movie: movie,
+                favoriteMovies: favoriteListModel,
+                onTap: () => onMovieTap(movie),
+                showStar: showStar,
+                onStar: onStar,
+                onRemoveStar: onRemoveStar))
             .toList());
   }
 }
