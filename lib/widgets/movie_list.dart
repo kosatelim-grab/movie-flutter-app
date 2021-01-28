@@ -9,11 +9,12 @@ class MovieTileWidget extends StatelessWidget {
   final Function(Movie) onRemoveStar;
   final bool showStar;
 
-  MovieTileWidget({this.movie, this.favoriteMovies, this.onTap, this.showStar, this.onStar, this.onRemoveStar});
+  MovieTileWidget({key, this.movie, this.favoriteMovies, this.onTap, this.showStar, this.onStar, this.onRemoveStar}): super(key: key);
 
   Widget _favoriteIcon() {
     bool isFavorite = favoriteMovies.indexWhere((x) => x.imdbId == movie.imdbId) > -1;
     return IconButton(
+      key: ValueKey('favorite_icon'),
       icon: Icon(isFavorite ? Icons.favorite : Icons.favorite_border, color: Colors.red.shade600),
       onPressed: () => isFavorite ? onRemoveStar(movie) : onStar(movie),
     );
@@ -80,15 +81,16 @@ class MovieListWidget extends StatelessWidget {
       return Center(child: Text("no result", textAlign: TextAlign.center));
     }
 
-    return ListView(
-        children: movies
-            .map<Widget>((movie) => MovieTileWidget(
-                movie: movie,
-                favoriteMovies: favoriteListModel,
-                onTap: () => onMovieTap(movie),
-                showStar: showStar,
-                onStar: onStar,
-                onRemoveStar: onRemoveStar))
-            .toList());
+    return ListView.builder(
+        key: ValueKey("movie_list"),
+        itemCount: movies.length,
+        itemBuilder: (context, index) => MovieTileWidget(
+            key: ValueKey('movie_tile_$index'),
+            movie: movies[index],
+            favoriteMovies: favoriteListModel,
+            onTap: () => onMovieTap(movies[index]),
+            showStar: showStar,
+            onStar: onStar,
+            onRemoveStar: onRemoveStar));
   }
 }

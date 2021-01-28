@@ -15,9 +15,15 @@ Widget buildView(SearchState state, Dispatch dispatch, ViewService viewService) 
       Padding(
         padding: EdgeInsets.fromLTRB(16, 10, 16, 10),
         child: TextField(
+            key: ValueKey("search_bar"),
+            onChanged: (query) => dispatch(SearchActionCreator.updateQuery(query)),
             onSubmitted: (query) => dispatch(SearchActionCreator.search(query)),
             decoration: InputDecoration(
-              icon: Icon(Icons.search),
+              icon: IconButton(
+                key: ValueKey("search_button"),
+                icon: Icon(Icons.search),
+                onPressed: () => dispatch(SearchActionCreator.search(state.query)),
+              ),
               hintText: 'Search movie name',
               border: InputBorder.none,
             )),

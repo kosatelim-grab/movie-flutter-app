@@ -1,7 +1,7 @@
 import 'package:fish_redux/fish_redux.dart';
 import 'package:movie_app/models/movie.dart';
 
-enum SearchAction { search, updateMovieList, tapMovie }
+enum SearchAction { search, updateMovieList, updateQuery, tapMovie }
 
 class SearchActionCreator {
   static Action updateMovieList(List<Movie> movies) {
@@ -10,6 +10,10 @@ class SearchActionCreator {
 
   static Action search(String query) {
     return Action(SearchAction.search, payload: query);
+  }
+
+  static Action updateQuery(String query) {
+    return Action(SearchAction.updateQuery, payload: query);
   }
 
   static Action tapMovie(Movie movie) {

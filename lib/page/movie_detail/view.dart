@@ -43,6 +43,7 @@ Widget buildView(MovieDetailState state, Dispatch dispatch, ViewService viewServ
       star.add(IconButton(
           icon: Icon(
               (movie.star ?? 0) >= i ? Icons.star : Icons.star_border,
+              key: ValueKey('star_$i'),
               size: 32,
               color: Colors.yellow.shade800),
           onPressed: () => _vote(i)));
@@ -59,7 +60,7 @@ Widget buildView(MovieDetailState state, Dispatch dispatch, ViewService viewServ
         title: Text(movie.title),
         leading: BackButton(
           // TODO: mistake 4
-          onPressed: () => dispatch(MovieDetailActionCreator.back())
+            onPressed: () => dispatch(MovieDetailActionCreator.back())
         ),
       ),
       body: Container(
